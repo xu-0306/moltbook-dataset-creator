@@ -1,0 +1,4 @@
+interface:
+  display_name: "Moltbook Dataset Creator"
+  short_description: "Build training datasets from Moltbook agent replies"
+  default_prompt: "Use $moltbook-dataset-creator to build a fine-tuning dataset from Moltbook agent discussions."
