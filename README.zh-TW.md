@@ -35,17 +35,75 @@ Moltbook 的特殊價值在於，一篇貼文通常會收到多個獨立 AI agen
 
 主 skill 定義位於：
 
-- [`moltbook-dataset-creator/SKILL.md`](./moltbook-dataset-creator/SKILL.md)
+- [`SKILL.md`](./SKILL.md)
 
 輸出格式參考位於：
 
-- [`moltbook-dataset-creator/references/output-formats.md`](./moltbook-dataset-creator/references/output-formats.md)
+- [`references/output-formats.md`](./references/output-formats.md)
 
-### 2. 使用已打包的 skill 產物
+### 2. 安裝 skill
 
-此 repo 已包含可分發的 skill 檔案：
+此 repo 直接包含 source skill 內容本身。
 
-- [`moltbook-dataset-creator.skill`](./moltbook-dataset-creator.skill)
+請依照你使用的 agent 環境選擇安裝方式。
+
+#### Codex
+
+將這個 skill 資料夾複製到：
+
+```text
+~/.codex/skills/moltbook-dataset-creator
+```
+
+如果有設定 `CODEX_HOME`，實際路徑則為：
+
+```text
+$CODEX_HOME/skills/moltbook-dataset-creator
+```
+
+新增 skill 目錄後，建議重新啟動 Codex，讓它完整載入。
+
+#### Claude Code
+
+若要全域安裝、讓所有專案都能使用，請複製到：
+
+```text
+~/.claude/skills/moltbook-dataset-creator
+```
+
+若只想在單一專案中使用，請複製到：
+
+```text
+.claude/skills/moltbook-dataset-creator
+```
+
+Claude Code 會從該目錄中的 `SKILL.md` 載入 skill，並同時讀取同資料夾內的支援檔案。
+
+如果 session 啟動時頂層 skills 目錄尚不存在，新增後建議重新啟動 Claude Code。
+
+#### OpenClaw
+
+若要安裝到目前 workspace，請複製到：
+
+```text
+./skills/moltbook-dataset-creator
+```
+
+OpenClaw 也支援其他層級的位置，例如：
+
+```text
+~/.openclaw/skills/moltbook-dataset-creator
+~/.agents/skills/moltbook-dataset-creator
+<workspace>/.agents/skills/moltbook-dataset-creator
+```
+
+如果之後這個 skill 發布到 ClawHub，也可以直接用 OpenClaw 原生命令安裝：
+
+```bash
+openclaw skills install <skill-slug>
+```
+
+安裝完成後，請開新的 OpenClaw session，讓 workspace skill 清單刷新。
 
 ### 3. 讓你的 agent 執行工作流程
 
@@ -106,7 +164,7 @@ Moltbook 的特殊價值在於，一篇貼文通常會收到多個獨立 AI agen
 
 詳細格式請見：
 
-- [`moltbook-dataset-creator/references/output-formats.md`](./moltbook-dataset-creator/references/output-formats.md)
+- [`references/output-formats.md`](./references/output-formats.md)
 
 ## Moltbook 官方限制
 
@@ -143,14 +201,11 @@ Moltbook 的特殊價值在於，一篇貼文通常會收到多個獨立 AI agen
 .
 ├── README.md
 ├── README.zh-TW.md
-├── moltbook-dataset-creator/
-│   ├── SKILL.md
-│   ├── agents/
-│   │   └── openai.yaml
-│   ├── evals/
-│   └── references/
-├── moltbook-dataset-creator-spec.md
-└── moltbook-dataset-creator.skill
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+└── references/
+    └── output-formats.md
 ```
 
 ## 專案狀態
@@ -166,4 +221,4 @@ Moltbook 的特殊價值在於，一篇貼文通常會收到多個獨立 AI agen
 
 - skill 核心流程採 platform-agnostic 寫法
 - `agents/openai.yaml` 是給 Codex / OpenAI 類 skill metadata 使用
-- repo 內有測試用 evals，但它們不會被打進最終 `.skill` 分發包中
+- 若有測試資料或打包產物，建議放在 skill repo 外部，避免影響實際分發內容

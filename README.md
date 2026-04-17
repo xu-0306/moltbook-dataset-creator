@@ -38,17 +38,78 @@ This project turns that multi-agent signal into a repeatable dataset pipeline.
 
 The main skill definition lives at:
 
-- [`moltbook-dataset-creator/SKILL.md`](./moltbook-dataset-creator/SKILL.md)
+- [`SKILL.md`](./SKILL.md)
 
 The output schema reference lives at:
 
-- [`moltbook-dataset-creator/references/output-formats.md`](./moltbook-dataset-creator/references/output-formats.md)
+- [`references/output-formats.md`](./references/output-formats.md)
 
-### 2. Use the packaged artifact
+### 2. Install the skill
 
-This repository already includes a packaged distributable skill:
+This repository contains the source skill folder directly.
 
-- [`moltbook-dataset-creator.skill`](./moltbook-dataset-creator.skill)
+Install using the method that matches your agent environment.
+
+#### Codex
+
+Copy this skill folder into:
+
+```text
+~/.codex/skills/moltbook-dataset-creator
+```
+
+If `CODEX_HOME` is set, the effective location is:
+
+```text
+$CODEX_HOME/skills/moltbook-dataset-creator
+```
+
+Restart Codex after adding a new skill directory so it is picked up cleanly.
+
+#### Claude Code
+
+For a personal installation across all projects, copy the skill folder into:
+
+```text
+~/.claude/skills/moltbook-dataset-creator
+```
+
+For a project-local installation, copy it into:
+
+```text
+.claude/skills/moltbook-dataset-creator
+```
+
+Claude Code loads `SKILL.md` from that directory and discovers supporting files
+from the same skill folder.
+
+If the top-level skills directory did not exist when the session started,
+restart Claude Code after adding it.
+
+#### OpenClaw
+
+For a workspace-local installation, copy the skill folder into:
+
+```text
+./skills/moltbook-dataset-creator
+```
+
+OpenClaw also supports broader-scope locations such as:
+
+```text
+~/.openclaw/skills/moltbook-dataset-creator
+~/.agents/skills/moltbook-dataset-creator
+<workspace>/.agents/skills/moltbook-dataset-creator
+```
+
+If this skill is later published to ClawHub, it can also be installed with
+OpenClaw's native skills command:
+
+```bash
+openclaw skills install <skill-slug>
+```
+
+Start a new OpenClaw session after installation so the workspace skill list is refreshed.
 
 ### 3. Run the workflow with your agent
 
@@ -109,7 +170,7 @@ metadata and provenance.
 - Raw Q&A with metadata
 
 See the detailed format reference in
-[`moltbook-dataset-creator/references/output-formats.md`](./moltbook-dataset-creator/references/output-formats.md).
+[`references/output-formats.md`](./references/output-formats.md).
 
 ## Official Moltbook Constraints
 
@@ -147,14 +208,11 @@ This project does not handle Moltbook registration itself.
 .
 ├── README.md
 ├── README.zh-TW.md
-├── moltbook-dataset-creator/
-│   ├── SKILL.md
-│   ├── agents/
-│   │   └── openai.yaml
-│   ├── evals/
-│   └── references/
-├── moltbook-dataset-creator-spec.md
-└── moltbook-dataset-creator.skill
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+└── references/
+    └── output-formats.md
 ```
 
 ## Project Status
@@ -170,5 +228,5 @@ Current repository state:
 
 - The core workflow is written to be platform-agnostic.
 - `agents/openai.yaml` is included for Codex/OpenAI-style skill metadata.
-- Evaluation fixtures exist in the repository for testing, but they are not
-  included in the packaged `.skill` artifact.
+- Any evaluation fixtures or packaging artifacts should be kept outside the
+  published skill repo unless you explicitly want to distribute them.
