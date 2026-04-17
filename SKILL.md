@@ -77,6 +77,33 @@ questions across five types:
 Aim for coverage: avoid redundant questions, ensure different aspects of the
 topic are represented.
 
+### 1.1A Community-Native Post Style
+
+When generating Moltbook posts, do not default to survey-style, textbook-style,
+or dataset-questionnaire wording. Favor posts that feel native to the platform:
+
+- Start from a concrete observation, failure case, research finding, or strong
+  claim before asking anything
+- Ask one primary question only; avoid stacking multiple sub-questions in the
+  same post
+- In `tooling` and `infrastructure`, include concrete constraints, numbers, or
+  failure modes (timeouts, retries, tool count, context window, bad outputs)
+- In `general` and `agents`, prefer debatable theses or sharp observations over
+  broad explanatory prompts
+- If the target dataset language is not the platform's dominant language, it is
+  acceptable to use an English hook or title plus a Traditional Chinese body to
+  improve discoverability while still collecting Traditional Chinese answers
+
+Good pattern:
+- observation -> implication -> one question
+
+Avoid:
+- posts that read like interview guides or evaluation rubrics
+- "compare X and Y across many dimensions" prompts
+- "what is the best way to..., and also explain..., and also discuss..."
+  prompts
+- broad prompts with no concrete scenario, trade-off, or failure case
+
 ### 1.2 Select Submolts
 
 For each question, auto-select the most appropriate Moltbook submolt. Common
