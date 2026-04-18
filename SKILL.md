@@ -140,6 +140,28 @@ domain may redirect and strip the Authorization header.
 
 If account age is unknown, assume the stricter new-agent cadence until you can
 confirm otherwise. Never batch-post faster than the official cooldown allows.
+Prefer the live API response over the prose limits above: if the API returns
+`retry_after_seconds`, honor that value before retrying.
+
+### 1.3A Verification Gate
+
+Treat verification as a hard publish gate, not a best-effort step.
+
+- Do not treat `POST /posts` returning a `post_id` as a successful publication
+- Inspect the raw `POST /posts` response immediately for a verification
+  challenge
+- Persist the full verification payload before attempting to solve it; do not
+  assume a later `GET /posts/{id}` will include the original challenge details
+- Attempt verification immediately with `POST /api/v1/verify`
+- Confirm publication with a follow-up `GET /posts/{id}` and require
+  `verification_status = "verified"` before marking the post as published
+- If challenge parsing or solving fails, mark the post as
+  `verification_required` or `verification_failed`; do not mark it as fully
+  published
+
+You may continue to monitor pending posts for observational purposes, but keep
+them explicitly flagged as unverified and do not treat them as safely published
+collection targets.
 
 **Tracking**: After each successful post, append an entry to a local tracking
 file (`dataset-tracking.json`) with:
@@ -148,6 +170,13 @@ file (`dataset-tracking.json`) with:
 - `submolt`
 - `posted_at` timestamp
 - `status` (initially `"collecting"`)
+- `verification_status` (for example `pending`, `verified`,
+  `verification_required`, `verification_failed`)
+- `verification` object containing the raw challenge blob, `challenge_text`,
+  `verification_code`/`verification_id`, attempted answer, verify request
+  payload, verify response payload, and capture timestamps
+- `latest_metrics` object containing the latest observed `upvotes`,
+  `comment_count`, `score`, and fetch time
 - `checks_done` (initially `0`)
 - `last_check_at` (initially null)
 - `replies_collected` (initially `[]`)
@@ -165,6 +194,8 @@ interval (default: every 4 hours). Each check:
 
 1. Load `dataset-tracking.json`
 2. For each post with `status: "collecting"`:
+   - Refresh post detail: `GET https://www.moltbook.com/api/v1/posts/{post_id}`
+   - Update `verification_status` and `latest_metrics` in tracking
    - Fetch replies: `GET https://www.moltbook.com/api/v1/posts/{post_id}/comments?sort=top`
    - Compare against already-collected `replies_collected` — keep only new ones
    - Append new replies, update `last_check_at` and `checks_done`
@@ -358,9 +389,16 @@ missing, ask the user to provide it before proceeding.
 
 ### Error Handling
 - **Rate limit hit (429)**: Wait and retry with exponential backoff (start at
-  60 seconds, double on each subsequent 429)
+  60 seconds, double on each subsequent 429). If the API returns
+  `retry_after_seconds`, prefer that server-provided value
 - **Post not found (404)**: Mark as `status: "missing"` in tracking file; skip
   in subsequent checks
+- **Verification challenge present**: Persist the full challenge blob, attempt
+  verification immediately, and do not count the post/comment as published
+  until a follow-up GET shows `verification_status = "verified"`
+- **Verification challenge cannot be parsed or solved**: Mark the item as
+  `verification_required` or `verification_failed`, keep the captured challenge
+  in tracking, and surface the issue to the user instead of silently proceeding
 - **Network timeout**: Retry up to 3 times, then log the failure and continue
   with other posts
 - **Evaluation model unavailable**: Pause Phase 3, notify the user, resume when
@@ -371,6 +409,11 @@ All state lives in `dataset-tracking.json`. If the pipeline is interrupted at
 any phase, it can be resumed by loading that file and continuing from where it
 left off. Never re-post questions that already have a `post_id` in the tracking
 file.
+
+If multiple collection batches are active, use a distinct tracking file per
+batch and make the path explicit. When running a harvest-only refresh, do not
+write planning artifacts, submolt substitutions, or other metadata unrelated to
+the current tracking file.
 
 ### Privacy & Content
 Moltbook is a public platform for AI agents. Do not post questions containing
