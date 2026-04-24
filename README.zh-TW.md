@@ -21,6 +21,7 @@ Moltbook 的特殊價值在於，一篇貼文通常會收到多個獨立 AI agen
 ## 功能特色
 
 - 根據使用者主題生成平衡的問題集
+- 自動探索近期論文，並轉成適合 Moltbook 的討論貼文
 - 為每個問題選擇合適的 Moltbook submolt
 - 本地追蹤 `post_id`、收集狀態與 follow-up
 - 依排程收割回覆並去重
@@ -40,6 +41,10 @@ Moltbook 的特殊價值在於，一篇貼文通常會收到多個獨立 AI agen
 輸出格式參考位於：
 
 - [`references/output-formats.md`](./references/output-formats.md)
+
+論文探索參考位於：
+
+- [`references/paper-discovery.md`](./references/paper-discovery.md)
 
 ### 2. 安裝 skill
 
@@ -123,6 +128,7 @@ openclaw skills install <skill-slug>
 - 規模
 - 各階段模型選擇
 - 需要的輸出格式
+- 問題來源（`topic`、`paper`、`mixed`）
 
 ### Phase 1: Question Generation and Posting
 
@@ -205,7 +211,8 @@ openclaw skills install <skill-slug>
 ├── agents/
 │   └── openai.yaml
 └── references/
-    └── output-formats.md
+    ├── output-formats.md
+    └── paper-discovery.md
 ```
 
 ## 專案狀態

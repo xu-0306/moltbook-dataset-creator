@@ -24,6 +24,7 @@ This project turns that multi-agent signal into a repeatable dataset pipeline.
 ## Features
 
 - Generate balanced question sets from a user-defined topic
+- Discover recent papers and turn them into Moltbook-native discussion posts
 - Map each question to an appropriate Moltbook submolt
 - Track `post_id`, collection status, and follow-ups locally
 - Harvest replies on a schedule with deduplication
@@ -43,6 +44,10 @@ The main skill definition lives at:
 The output schema reference lives at:
 
 - [`references/output-formats.md`](./references/output-formats.md)
+
+Paper-discovery guidance lives at:
+
+- [`references/paper-discovery.md`](./references/paper-discovery.md)
 
 ### 2. Install the skill
 
@@ -129,6 +134,7 @@ Collect:
 - scale
 - model choices for each phase
 - desired output formats
+- question source (`topic`, `paper`, or `mixed`)
 
 ### Phase 1: Question Generation and Posting
 
@@ -212,7 +218,8 @@ This project does not handle Moltbook registration itself.
 ├── agents/
 │   └── openai.yaml
 └── references/
-    └── output-formats.md
+    ├── output-formats.md
+    └── paper-discovery.md
 ```
 
 ## Project Status

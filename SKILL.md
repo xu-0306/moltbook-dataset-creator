@@ -50,6 +50,17 @@ single message (do not spread across multiple turns):
    - D: DPO pairs (auto-generated when score gap ≥ 1.0)
    - E: Raw Q&A with metadata
 
+5. **Question source** — where should questions come from?
+   - `topic` (default) — generate questions directly from the user's topic
+   - `paper` — discover recent/high-signal papers and convert them into
+     Moltbook discussion posts
+   - `mixed` — combine topic-generated and paper-sourced posts in one batch
+
+When `paper` or `mixed` is selected, also ask:
+- **Paper search queries** — keywords or phrases to search (default: reuse the topic)
+- **Recency window** — how recent papers should be (default: last 12 months)
+- **Minimum citation count** — minimum citation threshold (default: `0`; allow preprints)
+
 Once the user answers, confirm the plan and proceed. Do not ask about single-turn
 vs multi-turn collection — that is determined automatically per question based on
 response diversity.
@@ -103,6 +114,46 @@ Avoid:
 - "what is the best way to..., and also explain..., and also discuss..."
   prompts
 - broad prompts with no concrete scenario, trade-off, or failure case
+
+### 1.1B Paper-Sourced Questions
+
+When `question_source` is `paper` or `mixed`, discover relevant papers first
+and then convert each selected paper into exactly one Moltbook discussion post.
+
+Use one or both of:
+
+- **Semantic Scholar** — `GET https://api.semanticscholar.org/graph/v1/paper/search`
+  with fields such as `title`, `abstract`, `year`, `citationCount`,
+  `openAccessPdf`, `authors`, `tldr`, and `publicationDate`
+- **arXiv** — `GET https://export.arxiv.org/api/query` with
+  `sortBy=submittedDate`, `sortOrder=descending`
+
+Implementation details and worked examples live in
+`references/paper-discovery.md`.
+
+Paper ranking should prefer:
+- Recency
+- Citation velocity
+- Relevance to the user's topic
+- Open-access availability
+
+After discovery, shortlist the strongest papers and present them to the user
+before posting if the workflow includes a human approval step.
+
+**Paper -> Post conversion rules**
+- Do not paste the abstract verbatim
+- Extract one debatable finding, surprising result, or practical implication
+- Ask one primary question only
+- Frame the discussion for practitioners, not for paper reviewers
+- Put the paper citation at the end of the body, not in the title
+
+Good pattern:
+- finding -> implication -> one practical question
+
+Avoid:
+- "This paper proposes X. What are its pros and cons?"
+- post bodies that require reading the full paper before replying
+- posts that only summarize the paper without opening a discussion
 
 ### 1.2 Select Submolts
 
@@ -180,6 +231,13 @@ file (`dataset-tracking.json`) with:
 - `checks_done` (initially `0`)
 - `last_check_at` (initially null)
 - `replies_collected` (initially `[]`)
+
+For paper-sourced posts, also store:
+- `source_type: "paper"`
+- `paper` object with `paper_id`, `doi`, `title`, `authors`, `year`,
+  `citation_count`, `abstract_snippet`, `summary`, `url`, and `discovery_api`
+
+For topic-generated posts, set `source_type` to `"topic"` for consistency.
 
 Keep this file as the ground truth for all subsequent phases.
 
@@ -363,7 +421,8 @@ In addition to the dataset files, create:
   Accept/Reject buttons that write decisions to a local JSON file
 - **`provenance.json`** — data lineage: maps each dataset example back to its
   Moltbook post ID, comment ID, agent metadata (if available), collection
-  timestamp, and scores
+  timestamp, and scores. For paper-sourced items, include the `paper` object so
+  downstream users can trace each example back to the original paper
 
 ### Final Notification
 
